@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>95 Music - Walkman Edition</title>
+    <style>
+        :root {
+            --win-grey: #c0c0c0;
+            --win-white: #ffffff;
+            --win-dark: #808080;
+            --win-black: #000000;
+            --lcd-bg: #050505;
+            --lcd-text: #33ff33;
+        }
+
+        body {
+            margin: 0;
+            padding: 10px;
+            background-color: var(--win-grey);
+            font-family: 'Tahoma', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            height: 100vh;
+            overflow-y: auto;
+        }
+
+        .walkman-case {
+            width: 300px;
+            background: var(--win-grey);
+            border: 3px outset var(--win-white);
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 5px 5px 15px rgba(0,0,0,0.4);
+            margin-bottom: 20px;
+        }
+
+        .lcd-screen {
+            background: var(--lcd-bg);
+            border: 3px inset var(--win-white);
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .art-container {
+            width: 140px;
+            height: 140px;
+            border: 1px solid #333;
+            margin-bottom: 15px;
+            background: #111;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        #art { max-width: 100%; max-height: 100%; object-fit: cover; }
+
+        .lcd-info {
+            color: var(--lcd-text);
+            text-align: center;
+            font-family: 'Courier New', monospace;
+            width: 100%;
+        }
+
+        #title { font-size: 12px; font-weight: bold; margin: 0; text-transform: uppercase; }
+        #artist { font-size: 10px; margin: 4px 0; opacity: 0.8; }
+
+        input[type=range] { -webkit-appearance: none; width: 100%; background: transparent; }
+        input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 4px; background: var(--win-dark); border: 1px inset var(--win-white); }
+        input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; height: 18px; width: 10px; background: var(--win-grey); border: 2px outset var(--win-white); margin-top: -8px; }
+
+        .controls-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 15px; }
+
+        button {
+            background: var(--win-grey);
+            border: 2px solid;
+            border-color: var(--win-white) var(--win-black) var(--win-black) var(--win-white);
+            padding: 6px;
+            font-family: 'Tahoma', sans-serif;
+            font-size: 10px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        button:active { border-color: var(--win-black) var(--win-white) var(--win-white) var(--win-black); padding: 7px 5px 5px 7px; }
+
+        .play-btn { grid-column: span 3; font-size: 12px; padding: 10px; }
+
+        /* --- LIBRARY & INPUTS --- */
+        .library-drawer {
+            height: 220px;
+            background: white;
+            border: 2px inset var(--win-white);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .input-bar {
+            display: flex;
+            background: var(--win-grey);
+            padding: 3px;
+            border-bottom: 1px solid var(--win-dark);
+            gap: 3px;
+        }
+
+        input[type=text] { border: 2px inset var(--win-white); font-size: 10px; padding: 2px 4px; flex-grow: 1; outline: none; }
+
+        #queue { flex-grow: 1; overflow-y: scroll; background: white; font-size: 11px; }
+
+        .q-item {
+            display: flex;
+            align-items: center;
+            padding: 5px;
+            border-bottom: 1px solid #ddd;
+            cursor: pointer;
+        }
+
+        .q-item img { width: 30px; height: 30px; margin-right: 8px; border: 1px solid var(--win-dark); }
+        .q-item:hover { background: #000080; color: white; }
+        .q-item.active { background: #000080; color: white; font-weight: bold; }
+
+        #player-engine { display: none; }
+    </style>
+</head>
+<body>
+
+    <div class="walkman-case">
+        <div class="lcd-screen">
+            <div class="art-container">
+                <img id="art" src="https://win98icons.alexmeub.com/icons/png/cd_audio_cd-4.png">
+            </div>
+            <div class="lcd-info">
+                <div id="title">95 MUSIC READY</div>
+                <div id="artist">SONY-STYLE ENGINE</div>
+                <div style="font-size: 9px; margin-top: 8px;">
+                    <span id="curr-time">0:00</span> / <span id="dur-time">0:00</span>
+                </div>
+            </div>
+            <div style="width: 100%; margin-top: 10px;">
+                <input type="range" id="scrubber" min="0" max="100" value="0" oninput="manualSeek(this.value)">
+            </div>
+        </div>
+
+        <div class="controls-grid">
+            <button onclick="prev()">PREV</button>
+            <button onclick="next()">NEXT</button>
+            <button onclick="updateVolume(0)">MUTE</button>
+            <button onclick="togglePlay()" class="play-btn" id="play-pause">PLAY / PAUSE</button>
+        </div>
+
+        <div style="margin-bottom: 15px;">
+            <span style="font-size:9px; font-weight:bold;">VOL:</span>
+            <input type="range" id="volume-control" min="0" max="100" value="100" oninput="updateVolume(this.value)">
+        </div>
+
+        <div class="library-drawer">
+            <div class="input-bar">
+                <input type="text" id="query" placeholder="Search iTunes..." onkeypress="if(event.key==='Enter') doSearch()">
+                <button onclick="doSearch()">GO</button>
+            </div>
+            <div class="input-bar">
+                <input type="text" id="ytUrlInput" placeholder="Paste YouTube Link...">
+                <button onclick="importYoutubeUrl()">URL</button>
+            </div>
+            <div id="queue">
+                <div style="padding: 20px; text-align: center; color: #aaa; font-style: italic;">Search or paste a link...</div>
+            </div>
+        </div>
+    </div>
+
+    <div id="player-engine"><div id="player"></div></div>
+
+    <script src="https://www.youtube.com/iframe_api"></script>
+    <script>
+        let player, queue = [], cur = -1;
+
+        function onYouTubeIframeAPIReady() {
+            player = new YT.Player('player', {
+                height: '1', width: '1',
+                playerVars: { 'autoplay': 1, 'controls': 0 },
+                events: { 
+                    'onReady': startTimer, 
+                    'onStateChange': (e) => { if(e.data === 0) next(); }
+                }
+            });
+        }
+
+        async function doSearch() {
+            const q = document.getElementById('query').value; if(!q) return;
+            const res = await fetch(`https://itunes.apple.com/search?term=${encodeURIComponent(q)}&entity=song&limit=12`);
+            const data = await res.json();
+            const qDiv = document.getElementById('queue'); qDiv.innerHTML = '';
+            data.results.forEach(s => {
+                const img = s.artworkUrl100;
+                const item = document.createElement('div');
+                item.className = 'q-item';
+                item.innerHTML = `<img src="${img}"> <div>${s.trackName}<br><small style="opacity:0.6">${s.artistName}</small></div>`;
+                item.onclick = () => resolveTrack(s.trackName, s.artistName, img.replace('100x100','600x600'));
+                qDiv.appendChild(item);
+            });
+        }
+
+        async function resolveTrack(t, a, img) {
+            const res = await fetch(`https://invidious.ducks.party/api/v1/search?q=${encodeURIComponent(t + ' ' + a)}&type=video`);
+            const data = await res.json();
+            if(data[0]) {
+                queue.push({ title: t, artist: a, art: img, id: data[0].videoId });
+                updateQueue();
+                if(cur === -1) play(queue.length - 1);
+            }
+        }
+
+        function importYoutubeUrl() {
+            const val = document.getElementById('ytUrlInput').value.trim();
+            if(!val) return;
+            let vId = val.includes("v=") ? val.split("v=")[1].split("&")[0] : (val.includes("youtu.be/") ? val.split("youtu.be/")[1].split("?")[0] : val);
+            if(vId) {
+                queue.push({ title: "Imported Track", artist: "YouTube Audio", art: `https://img.youtube.com/vi/${vId}/hqdefault.jpg`, id: vId });
+                updateQueue();
+                if(cur === -1) play(queue.length - 1);
+                document.getElementById('ytUrlInput').value = "";
+            }
+        }
+
+        function play(i) {
+            cur = i; const s = queue[i];
+            document.getElementById('title').innerText = s.title;
+            document.getElementById('artist').innerText = s.artist;
+            document.getElementById('art').src = s.art;
+            player.loadVideoById(s.id);
+            updateQueue();
+        }
+
+        function updateQueue() {
+            document.getElementById('queue').innerHTML = queue.map((s, i) => `
+                <div class="q-item ${i===cur?'active':''}" onclick="play(${i})">
+                    <img src="${s.art}">
+                    <div>${s.title}</div>
+                </div>
+            `).join('');
+        }
+
+        function startTimer() {
+            setInterval(() => {
+                if(player && player.getCurrentTime) {
+                    const c = player.getCurrentTime(), d = player.getDuration();
+                    document.getElementById('scrubber').value = (c/d)*100 || 0;
+                    document.getElementById('curr-time').innerText = format(c);
+                    document.getElementById('dur-time').innerText = format(d);
+                }
+            }, 500);
+        }
+
+        function format(s) { let m=Math.floor(s/60), r=Math.floor(s%60); return m+":"+(r<10?'0':'')+r; }
+        function manualSeek(v) { player.seekTo((v/100)*player.getDuration(), true); }
+        function togglePlay() { player.getPlayerState()===1 ? player.pauseVideo() : player.playVideo(); }
+        function updateVolume(v) { player.setVolume(v); }
+        function next() { if(cur < queue.length-1) play(cur+1); }
+        function prev() { if(cur > 0) play(cur-1); }
+    </script>
+</body>
+</html>
