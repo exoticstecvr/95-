@@ -90,6 +90,7 @@
     <div class="icon" onclick="openApp('ie', 'Internet Explorer', 'https://win98icons.alexmeub.com/icons/png/msie1-2.png')"><img src="https://win98icons.alexmeub.com/icons/png/msie1-2.png"> Internet Explorer</div>
     <div class="icon" onclick="openApp('notepad', 'Notepad', 'https://win98icons.alexmeub.com/icons/png/notepad-0.png')"><img src="https://win98icons.alexmeub.com/icons/png/notepad-0.png"> Notepad</div>
     <div class="icon" onclick="openApp('calc', 'Calculator', 'https://win98icons.alexmeub.com/icons/png/calculator-0.png')"><img src="https://win98icons.alexmeub.com/icons/png/calculator-0.png"> Calculator</div>
+    <div class="icon" onclick="openApp('music', '95 Music', 'https://win98icons.alexmeub.com/icons/png/cd_audio_cd-4.png')"><img src="https://images.dwncdn.net/images/t_app-icon-l/p/6598e7df-7cd1-4163-8d6f-69d8d8978cbd/3589763149/2141_4-78370130-imgingest-4910938650338722334.png"> 95 Music</div>
 </div>
 
 <div class="start-menu" id="start-menu" onclick="event.stopPropagation()">
@@ -98,6 +99,10 @@
         <div class="menu-item" onclick="openApp('ie', 'Internet Explorer', 'https://win98icons.alexmeub.com/icons/png/msie1-2.png')">
             <span><img src="https://win98icons.alexmeub.com/icons/png/msie1-2.png" width="16"> Internet Explorer</span>
             <span class="pin-action" onclick="pinApp(event, 'ie', 'https://win98icons.alexmeub.com/icons/png/msie1-2.png', 'Internet Explorer')">Pin</span>
+        </div>
+        <div class="menu-item" onclick="openApp('music', '95 Music', 'https://win98icons.alexmeub.com/icons/png/cd_audio_cd-4.png')">
+            <span><img src="https://win98icons.alexmeub.com/icons/png/cd_audio_cd-4.png" width="16"> 95 Music</span>
+            <span class="pin-action" onclick="pinApp(event, 'music', 'https://win98icons.alexmeub.com/icons/png/cd_audio_cd-4.png', '95 Music')">Pin</span>
         </div>
         <div class="menu-item" onclick="openApp('notepad', 'Notepad', 'https://win98icons.alexmeub.com/icons/png/notepad-0.png')">
             <span><img src="https://win98icons.alexmeub.com/icons/png/notepad-0.png" width="16"> Notepad</span>
@@ -109,6 +114,16 @@
         </div>
         <div style="height:1px; background:gray; margin:4px 0;"></div>
         <div class="menu-item" onclick="location.reload()"><img src="https://win98icons.alexmeub.com/icons/png/shut_down_normal-4.png" width="16"> Shut Down...</div>
+    </div>
+</div>
+
+<div class="window" id="win-music" style="width: 335px; height: 680px; top: 10px; left: 300px;">
+    <div class="title-bar" onmousedown="dragStart(event, 'win-music')">
+        <span>95 Music Player</span>
+        <div class="window-controls"><button onclick="minimizeApp('music')">_</button><button onclick="closeApp('music')">X</button></div>
+    </div>
+    <div class="content-frame">
+        <iframe src="music.html" style="width:100%; height:100%; border:none;"></iframe>
     </div>
 </div>
 
